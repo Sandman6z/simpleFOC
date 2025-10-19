@@ -53,8 +53,14 @@ float target_torque = 0.0f;
 
 // 命令接口
 Commander command = Commander(Serial);
-void onTarget(char* cmd) { command.scalar(&target_torque, cmd); }
-void onLimit(char* cmd) { command.scalar(&motor.voltage_limit, cmd); }
+void onTarget(char* cmd) {
+  command.scalar(&target_torque, cmd);
+  Serial.print("[CMD] target_torque="); Serial.println(target_torque);
+}
+void onLimit(char* cmd) {
+  command.scalar(&motor.voltage_limit, cmd);
+  Serial.print("[CMD] voltage_limit="); Serial.println(motor.voltage_limit);
+}
 
 void setup() {
   Serial.begin(115200);
@@ -117,10 +123,14 @@ void setup() {
   motor.initFOC();
   Serial.println("FOC初始化完成!");
 
+  // 使能电机输出
+  motor.enable();
+  Serial.println("Motor enabled");
+ 
   // 命令行交互：设置目标转矩与限制
   command.add('T', onTarget, "目标转矩(电压)");
   command.add('L', onLimit,  "电压限制");
-
+ 
   Serial.println("闭环转矩控制就绪!");
   Serial.println("通过串口发送: T 1.5  设置目标转矩为 1.5[V]");
   Serial.println("通过串口发送: L 3    设置电压限制为 3[V]");
